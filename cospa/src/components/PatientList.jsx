@@ -38,7 +38,23 @@ const PatientList = ({ data, onEdit, onDelete }) => {
                   <Typography variant="body2" color="text.secondary">
                     Teléfono: {patient.telefono}
                   </Typography>
-                  <Box sx={{ mt: 1 }}>
+
+                  {/* Mostrar firma si existe */}
+                  {patient.firmaDibujo && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Firma digital:
+                      </Typography>
+                      <Box
+                        component="img"
+                        src={patient.firmaDibujo}
+                        alt="Firma digital"
+                        sx={{ maxWidth: '100%', height: 80, border: '1px solid #ccc', mt: 1 }}
+                      />
+                    </Box>
+                  )}
+
+                  <Box sx={{ mt: 2 }}>
                     <ExportToPDF form={patient} />
                   </Box>
                 </Box>

@@ -1,9 +1,11 @@
 import React from 'react';
 import jsPDF from 'jspdf';
 import { Button } from '@mui/material';
-import Logo from '../assets/logoNavBar.png'; // asegurate de que la ruta del logo sea correcta
+import Logo from '../assets/logoNavBar.png'; // Asegurate de que esta ruta sea válida
 
-const ExportToPDF = ({ paciente }) => {
+const ExportToPDF = ({ form }) => {
+  if (!form) return null;
+
   const generarPDF = () => {
     const doc = new jsPDF();
     const azul = '#1565c0';
@@ -24,7 +26,6 @@ const ExportToPDF = ({ paciente }) => {
 
     doc.setFontSize(12);
 
-    // Función para líneas
     const agregarLinea = (label, value) => {
       doc.setTextColor(azul);
       doc.text(`${label}`, 20, y);
@@ -33,14 +34,18 @@ const ExportToPDF = ({ paciente }) => {
       y += 8;
     };
 
-    // Datos principales
-    agregarLinea('Nombre y Apellido:', paciente.nombre);
-    agregarLinea('DNI:', paciente.dni);
-    agregarLinea('Fecha de Nacimiento:', paciente.fechaNacimiento);
-    agregarLinea('Edad:', paciente.edad);
-    agregarLinea('Teléfono:', paciente.telefono);
-    agregarLinea('Email:', paciente.email);
-    agregarLinea('¿Cómo nos conociste?:', paciente.conociste);
+    // Datos personales
+    agregarLinea('Nombre y Apellido:', form.nombre);
+    agregarLinea('DNI:', form.dni);
+    agregarLinea('Fecha de Nacimiento:', form.fechaNacimiento);
+    agregarLinea('Edad:', form.edad);
+    agregarLinea('Teléfono:', form.telefono);
+    agregarLinea('Email:', form.email);
+
+    const conocisteTexto = form.conociste === 'Otro'
+      ? `Otro: ${form.otroConocisteDetalle || 'Sin especificar'}`
+      : form.conociste;
+    agregarLinea('¿Cómo nos conociste?:', conocisteTexto);
 
     y += 5;
     doc.setTextColor(azul);
@@ -49,49 +54,46 @@ const ExportToPDF = ({ paciente }) => {
     y += 8;
     doc.setFontSize(12);
 
-    agregarLinea('- Enfermedad crónica:', paciente.enfermedad ? 'Sí' : 'No');
-    if (paciente.enfermedad) agregarLinea('   Detalle:', paciente.enfermedadDetalle);
+    agregarLinea('- Enfermedad crónica:', form.enfermedad ? 'Sí' : 'No');
+    if (form.enfermedad) agregarLinea('   Detalle:', form.enfermedadDetalle);
 
-    agregarLinea('- Tratamiento médico:', paciente.tratamiento ? 'Sí' : 'No');
-    if (paciente.tratamiento) agregarLinea('   Detalle:', paciente.tratamientoDetalle);
+    agregarLinea('- Tratamiento médico:', form.tratamiento ? 'Sí' : 'No');
+    if (form.tratamiento) agregarLinea('   Detalle:', form.tratamientoDetalle);
 
-    agregarLinea('- Toma medicación:', paciente.medicacion ? 'Sí' : 'No');
-    if (paciente.medicacion) agregarLinea('   Detalle:', paciente.medicacionDetalle);
+    agregarLinea('- Toma medicación:', form.medicacion ? 'Sí' : 'No');
+    if (form.medicacion) agregarLinea('   Detalle:', form.medicacionDetalle);
 
-    agregarLinea('- Cirugías o lesiones:', paciente.cirugias ? 'Sí' : 'No');
-    if (paciente.cirugias) agregarLinea('   Detalle:', paciente.cirugiasDetalle);
+    agregarLinea('- Cirugías o lesiones:', form.cirugias ? 'Sí' : 'No');
+    if (form.cirugias) agregarLinea('   Detalle:', form.cirugiasDetalle);
 
-    agregarLinea('- Alergias medicamentos/aceites:', paciente.alergias ? 'Sí' : 'No');
-    if (paciente.alergias) agregarLinea('   Detalle:', paciente.alergiasDetalle);
+    agregarLinea('- Alergias medicamentos/aceites:', form.alergias ? 'Sí' : 'No');
+    if (form.alergias) agregarLinea('   Detalle:', form.alergiasDetalle);
 
-    agregarLinea('- Problemas circulatorios:', paciente.circulatorio ? 'Sí' : 'No');
-    if (paciente.circulatorio) agregarLinea('   Detalle:', paciente.circulatorioDetalle);
+    agregarLinea('- Problemas circulatorios:', form.circulatorio ? 'Sí' : 'No');
+    if (form.circulatorio) agregarLinea('   Detalle:', form.circulatorioDetalle);
 
-    agregarLinea('- Hipertensión o cardíacos:', paciente.cardiaco ? 'Sí' : 'No');
-    if (paciente.cardiaco) agregarLinea('   Detalle:', paciente.cardiacoDetalle);
+    agregarLinea('- Hipertensión o cardíacos:', form.cardiaco ? 'Sí' : 'No');
+    if (form.cardiaco) agregarLinea('   Detalle:', form.cardiacoDetalle);
 
-    agregarLinea('- Molestias musculares:', paciente.musculares ? 'Sí' : 'No');
-    if (paciente.musculares) agregarLinea('   Detalle:', paciente.muscularesDetalle);
+    agregarLinea('- Molestias musculares:', form.musculares ? 'Sí' : 'No');
+    if (form.musculares) agregarLinea('   Detalle:', form.muscularesDetalle);
 
-    agregarLinea('- Embarazada:', paciente.embarazada ? 'Sí' : 'No');
-    if (paciente.embarazada) agregarLinea('   Detalle:', paciente.embarazadaDetalle);
+    agregarLinea('- Embarazada:', form.embarazada ? 'Sí' : 'No');
+    if (form.embarazada) agregarLinea('   Detalle:', form.embarazadaDetalle);
 
     y += 5;
-    agregarLinea('Observaciones:', paciente.observaciones);
+    agregarLinea('Observaciones:', form.observaciones);
+    agregarLinea('Aclaración de firma:', form.firma);
 
-    // Firma escrita
-    if (paciente.firma) agregarLinea('Firma del paciente (escrita):', paciente.firma);
-
-    // Firma dibujo
-    if (paciente.firmaDibujo) {
+    if (form.firmaDibujo) {
       doc.setTextColor(azul);
       doc.text('Firma digital:', 20, y);
       y += 2;
-      doc.addImage(paciente.firmaDibujo, 'PNG', 20, y, 60, 25);
+      doc.addImage(form.firmaDibujo, 'PNG', 20, y, 60, 25);
       y += 30;
     }
 
-    agregarLinea('Fecha:', paciente.fecha);
+    agregarLinea('Fecha:', form.fecha);
 
     // Footer
     y = 280;
@@ -103,7 +105,7 @@ const ExportToPDF = ({ paciente }) => {
     doc.text('cospamasajes@gmail.com', 20, y + 10);
     doc.text('Documento generado digitalmente. Válido sin firma.', 20, y + 15);
 
-    doc.save(`ficha_clinica_${paciente.nombre}.pdf`);
+    doc.save(`ficha_clinica_${form.nombre || 'paciente'}.pdf`);
   };
 
   return (
