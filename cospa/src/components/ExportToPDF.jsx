@@ -1,111 +1,151 @@
 import React from 'react';
 import jsPDF from 'jspdf';
 import { Button } from '@mui/material';
-import Logo from '../assets/logoNavBar.png'; // Asegurate de que esta ruta sea válida
+import Logo from '../assets/logoNavBar.png'; // Asegúrate que la ruta sea correcta
 
 const ExportToPDF = ({ form }) => {
   if (!form) return null;
 
-  const generarPDF = () => {
-    const doc = new jsPDF();
-    const azul = '#1565c0';
-    let y = 20;
-
-    // Logo
-    doc.addImage(Logo, 'PNG', 160, 10, 30, 30);
-
-    // Título
-    doc.setTextColor(azul);
-    doc.setFontSize(16);
-    doc.text('Ficha Clínica - CoSpa Masajes', 20, y);
-    y += 10;
-
-    doc.setDrawColor(azul);
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    doc.setFontSize(12);
-
-    const agregarLinea = (label, value) => {
-      doc.setTextColor(azul);
-      doc.text(`${label}`, 20, y);
-      doc.setTextColor(0, 0, 0);
-      doc.text(`${value || 'No'}`, 70, y);
-      y += 8;
-    };
-
-    // Datos personales
-    agregarLinea('Nombre y Apellido:', form.nombre);
-    agregarLinea('DNI:', form.dni);
-    agregarLinea('Fecha de Nacimiento:', form.fechaNacimiento);
-    agregarLinea('Edad:', form.edad);
-    agregarLinea('Teléfono:', form.telefono);
-    agregarLinea('Email:', form.email);
-
-    const conocisteTexto = form.conociste === 'Otro'
-      ? `Otro: ${form.otroConocisteDetalle || 'Sin especificar'}`
-      : form.conociste;
-    agregarLinea('¿Cómo nos conociste?:', conocisteTexto);
-
-    y += 5;
-    doc.setTextColor(azul);
-    doc.setFontSize(14);
-    doc.text('Salud Actual', 20, y);
-    y += 8;
-    doc.setFontSize(12);
-
-    agregarLinea('- Enfermedad crónica:', form.enfermedad ? 'Sí' : 'No');
-    if (form.enfermedad) agregarLinea('   Detalle:', form.enfermedadDetalle);
-
-    agregarLinea('- Tratamiento médico:', form.tratamiento ? 'Sí' : 'No');
-    if (form.tratamiento) agregarLinea('   Detalle:', form.tratamientoDetalle);
-
-    agregarLinea('- Toma medicación:', form.medicacion ? 'Sí' : 'No');
-    if (form.medicacion) agregarLinea('   Detalle:', form.medicacionDetalle);
-
-    agregarLinea('- Cirugías o lesiones:', form.cirugias ? 'Sí' : 'No');
-    if (form.cirugias) agregarLinea('   Detalle:', form.cirugiasDetalle);
-
-    agregarLinea('- Alergias medicamentos/aceites:', form.alergias ? 'Sí' : 'No');
-    if (form.alergias) agregarLinea('   Detalle:', form.alergiasDetalle);
-
-    agregarLinea('- Problemas circulatorios:', form.circulatorio ? 'Sí' : 'No');
-    if (form.circulatorio) agregarLinea('   Detalle:', form.circulatorioDetalle);
-
-    agregarLinea('- Hipertensión o cardíacos:', form.cardiaco ? 'Sí' : 'No');
-    if (form.cardiaco) agregarLinea('   Detalle:', form.cardiacoDetalle);
-
-    agregarLinea('- Molestias musculares:', form.musculares ? 'Sí' : 'No');
-    if (form.musculares) agregarLinea('   Detalle:', form.muscularesDetalle);
-
-    agregarLinea('- Embarazada:', form.embarazada ? 'Sí' : 'No');
-    if (form.embarazada) agregarLinea('   Detalle:', form.embarazadaDetalle);
-
-    y += 5;
-    agregarLinea('Observaciones:', form.observaciones);
-    agregarLinea('Aclaración de firma:', form.firma);
-
-    if (form.firmaDibujo) {
-      doc.setTextColor(azul);
-      doc.text('Firma digital:', 20, y);
-      y += 2;
-      doc.addImage(form.firmaDibujo, 'PNG', 20, y, 60, 25);
-      y += 30;
+  const ajustarTexto = (doc, text, x, y, maxWidth, align = 'left') => {
+    const fontSize = doc.getFontSize();
+    const textWidth = doc.getTextWidth(text);
+    if (textWidth > maxWidth) {
+      const scale = maxWidth / textWidth;
+      doc.setFontSize(fontSize * scale);
     }
+    doc.text(text, x, y, { align });
+    doc.setFontSize(fontSize); // Restablece el tamaño original
+  };
 
-    agregarLinea('Fecha:', form.fecha);
+  const generarPDF = () => {
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const azul = '#1565c0';
+      const gris = '#666666';
 
-    // Footer
-    y = 280;
-    doc.setDrawColor(180);
-    doc.line(20, y, 190, y);
-    doc.setFontSize(8);
-    doc.setTextColor(100);
-    doc.text('CoSpa Masajes - Av. Bienestar 1234 - Córdoba', 20, y + 5);
-    doc.text('cospamasajes@gmail.com', 20, y + 10);
-    doc.text('Documento generado digitalmente. Válido sin firma.', 20, y + 15);
+      // Sello de agua "FIRMA DIGITAL"
+      doc.setTextColor(200);
+      doc.setFontSize(50);
+      doc.text('FIRMA DIGITAL', 105, 150, {
+        align: 'center',
+        angle: 45,
+        opacity: 0.1
+      });
 
-    doc.save(`ficha_clinica_${form.nombre || 'paciente'}.pdf`);
+      // Logo más pequeño y título centrado
+      if (Logo) {
+        doc.addImage(Logo, 'PNG', 90, 5, 30, 25);
+      }
+      doc.setFontSize(18);
+      doc.setTextColor(azul);
+      ajustarTexto(doc, 'Ficha Clínica - CoSpa Masajes', 105, 40, 150, 'center');
+      doc.setDrawColor(azul);
+      doc.line(30, 45, 180, 45);
+
+      let y = 50; // Reducimos margen inicial aún más
+
+      // Datos personales
+      const datosPersonales = [
+        ['Nombre y Apellido:', form.nombre || 'No definido'],
+        ['DNI:', form.dni || 'No definido'],
+        ['Fecha de Nacimiento:', form.fechaNacimiento || 'No definido'],
+        ['Edad:', form.edad || 'No definido'],
+        ['Teléfono:', form.telefono || 'No definido'],
+        ['Email:', form.email || 'No definido'],
+        ['¿Cómo nos conociste?:',
+          form.conociste === 'Otro'
+            ? `Otro: ${form.otroConocisteDetalle || 'Sin especificar'}`
+            : form.conociste || 'No definido']
+      ];
+
+      doc.setFontSize(12);
+      datosPersonales.forEach(([label, value]) => {
+        doc.setTextColor(azul);
+        ajustarTexto(doc, label, 35, y, 60);
+        doc.setTextColor(0, 0, 0);
+        ajustarTexto(doc, value, 100, y, 80);
+        y += 6;
+      });
+
+      doc.setDrawColor(azul);
+      doc.line(30, y + 2, 180, y + 2);
+      y += 6;
+
+      // Salud Actual
+      doc.setTextColor(azul);
+      doc.setFontSize(13);
+      ajustarTexto(doc, 'Salud Actual', 105, y, 150, 'center');
+      y += 6;
+
+      const saludActual = [
+        ['Enfermedad crónica:', form.enfermedad ? 'Sí' : 'No'],
+        ['Tratamiento médico:', form.tratamiento ? 'Sí' : 'No'],
+        ['Toma medicación:', form.medicacion ? 'Sí' : 'No'],
+        ['Cirugías o lesiones:', form.cirugias ? 'Sí' : 'No'],
+        ['Alergias medicamentos/aceites/cremas:', form.alergias ? 'Sí' : 'No'],
+        ['Problemas circulatorios:', form.circulatorio ? 'Sí' : 'No'],
+        ['Hipertensión o cardíacos:', form.cardiaco ? 'Sí' : 'No'],
+        ['Molestias musculares:', form.musculares ? 'Sí' : 'No'],
+        ['Embarazada:', form.embarazada ? 'Sí' : 'No']
+      ];
+
+      saludActual.forEach(([label, value]) => {
+        doc.setTextColor(azul);
+        ajustarTexto(doc, label, 35, y, 60);
+        doc.setTextColor(0, 0, 0);
+        ajustarTexto(doc, value, 110, y, 80);
+        y += 6;
+      });
+
+      // Observaciones en bloque para evitar superposición
+      y += 4;
+      doc.setTextColor(azul);
+      ajustarTexto(doc, 'Observaciones:', 35, y, 60);
+      y += 5;
+      doc.setTextColor(0, 0, 0);
+      const splitText = doc.splitTextToSize(form.observaciones || 'Sin observaciones', 130);
+      splitText.forEach(line => {
+        doc.text(line, 35, y);
+        y += 5;
+      });
+
+      // Firma digital compacta y sin margen superior
+      if (form.firmaDibujo) {
+        y += 4;
+        doc.setTextColor(azul);
+        ajustarTexto(doc, 'Firma digital:', 35, y, 60);
+        doc.setDrawColor(gris);
+        doc.rect(35, y + 1, 80, 18);
+        doc.addImage(form.firmaDibujo, 'PNG', 36, y + 2, 78, 16);
+        y += 22;
+
+        doc.setTextColor(azul);
+        ajustarTexto(doc, 'Aclaración de firma:', 35, y, 60);
+        doc.setTextColor(0, 0, 0);
+        ajustarTexto(doc, form.firma || 'No definido', 85, y, 80);
+        y += 6;
+      }
+
+      // Fecha
+      doc.setTextColor(azul);
+      ajustarTexto(doc, 'Fecha:', 35, y, 40);
+      doc.setTextColor(0, 0, 0);
+      ajustarTexto(doc, form.fecha || 'No definido', 55, y, 80);
+
+      y += 4;
+
+      // Pie de página
+      doc.setDrawColor(gris);
+      doc.line(30, 280, 180, 280);
+      doc.setFontSize(10);
+      doc.setTextColor(gris);
+      ajustarTexto(doc, 'CoSpa Masajes - Tu tiempo de relajación.', 105, 285, 150, 'center');
+      ajustarTexto(doc, 'Documento generado y validado con firma digital.', 105, 291, 160, 'center');
+
+      doc.save(`ficha_clinica_${form.nombre || 'paciente'}.pdf`);
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+    }
   };
 
   return (
