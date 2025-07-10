@@ -223,7 +223,17 @@ const PatientForm = ({ onSubmit, initialData }) => {
                   placeholder="Especificar si hay algo relevante que debamos saber antes del masaje 🤗"
                   value={form.observaciones}
                   onChange={handleChange}
+                  InputProps={{
+                    sx: {
+                      '& .MuiInputBase-input::placeholder': {
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? '#cccccc' : '#888888',
+                        opacity: 1, // asegura visibilidad
+                      },
+                    },
+                  }}
                 />
+
               </Paper>
             </Grid>
           </Grid>
